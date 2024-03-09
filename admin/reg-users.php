@@ -1,0 +1,162 @@
+<?php
+session_start();
+error_reporting(0);
+include('includes/dbconnection.php');
+if (strlen($_SESSION['ocasaid'] == 0)) {
+    header('location:logout.php');
+} else {
+
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "ocmmsdb";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    //search button
+    $searchQuery = "";
+
+    // Handle search form submission
+    if (isset($_POST['search'])) {
+        $searchQuery = $_POST['searchText'];
+    }
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <title>E-Learning|| Registered Users</title>
+        <!-- Google Web Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <!-- Icon Font Stylesheet -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- Libraries Stylesheet -->
+        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+        <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+
+        <!-- Customized Bootstrap Stylesheet -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Template Stylesheet -->
+        <link href="css/style.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="container-fluid position-relative bg-white d-flex p-0">
+
+            <?php include_once('includes/sidebar.php'); ?>
+            <!-- Content Start -->
+            <div class="content">
+                <?php include_once('includes/header.php'); ?>
+
+                <!-- Table code -->
+                <div class="table-responsive">
+                    <table class="table text-start align-middle table-bordered table-hover mb-0">
+                        <thead>
+                            <tr class="text-dark">
+                                <th scope="col">#</th>
+                                <th scope="col">Full Name</th>
+                                <th scope="col">Mobile Number</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Class Name</th>
+                                <th scope="col">Registration Date</th>
+                                <th scope="col">validation</th>
+                                <th scope="col">access</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--                              
+                                // Fetch user details from the database and display them in the table
+                                // $sql = "SELECT FullName, MobileNumber, Email, ClassID, RegDate, validation FROM tbluser
+                                // LEFT JOIN your_class_table c ON u.ClassID = c.ClassID";
+                                // $sql = "SELECT * FROM tbluser u
+                                // LEFT JOIN tblclass c ON u.ClassID = c.Id
+                                // UNION
+                                // SELECT * FROM tbluser u
+                                // RIGHT JOIN tblclass c ON u.ClassID = c.Id;
+                                // ";  -->
+                            <!-- Search Form -->
+
+                            <form method="post" class="mb-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="searchText"
+                                        placeholder="Search by name, email, or class" value="<?php echo $searchQuery; ?>">
+                                    <button type="submit" name="search" class="btn btn-primary">Search</button>
+                                </div>
+                            </form>
+
+                            <!-- Table code -->
+                            <div class="table-responsive">
+                                <table class="table text-start align-middle table-bordered table-hover mb-0">
+                                    <!-- ... (table headers) ... -->
+                                    <tbody>
+                                        <?php
+                                        // Fetch user details from the database and display them in the table
+                                        $sql = "SELECT u.FullName, u.MobileNumber, u.Email, u.ClassID, u.RegDate, u.validation, c.class FROM tbluser u
+                            LEFT JOIN tblclass c ON u.ClassID = c.ID
+                            WHERE u.FullName LIKE '%$searchQuery%' OR u.Email LIKE '%$searchQuery%' OR c.class LIKE '%$searchQuery%'";
+                                        $result = $conn->query($sql);
+
+                                        if ($result->num_rows > 0) {
+                                            $count = 1;
+                                            while ($row = $result->fetch_assoc()) {
+                                                echo '<tr>';
+                                                echo '<td>' . $count . '</td>';
+                                                echo '<td>' . $row["FullName"] . '</td>';
+                                                echo '<td>' . $row["MobileNumber"] . '</td>';
+                                                echo '<td>' . $row["Email"] . '</td>';
+                                                echo '<td>' . $row["class"] . '</td>';
+                                                echo '<td>' . $row["RegDate"] . '</td>';
+                                                // echo '<td>' . ($row["validation"] == 1 ? 'Granted' : 'Not Granted') . '</td>';
+                                                echo '<td>';
+
+                                                // Conditionally set text color based on "Granted" or "Not Granted"
+                                                if ($row["validation"] == 1) {
+                                                    echo '<span style="color: green;">Granted</span>';
+                                                } else {
+                                                    echo '<span style="color: red;">Not Granted</span>';
+                                                }
+
+                                                echo '</td>';
+                                                echo '<td><a href="toggle_validation.php?email=' . $row["Email"] . '">Access control</a></td>';
+                                                echo '</tr>';
+                                                $count++;
+                                            }
+                                        } else {
+                                            echo '<tr><td colspan="7">No records found!</td></tr>';
+                                        }
+                                        ?>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                            <!-- JavaScript Libraries -->
+                            <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+                            <script
+                                src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+                            <script src="lib/chart/chart.min.js"></script>
+                            <script src="lib/easing/easing.min.js"></script>
+                            <script src="lib/waypoints/waypoints.min.js"></script>
+                            <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+                            <script src="lib/tempusdominus/js/moment.min.js"></script>
+                            <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
+                            <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+
+                            <!-- Template Javascript -->
+                            <script src="js/main.js"></script>
+    </body>
+
+    </html>
+<?php } ?>

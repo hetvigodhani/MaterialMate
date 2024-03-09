@@ -1,0 +1,20 @@
+Pending works
+
+User
+1. Make Complaint - hetvi
+2. Update Profile - hetvi
+3. Fees - hetvi
+
+Admin
+1. Manage Complaint - hetvi 
+2. Update Profile
+3. report of user enrolled - het 
+4. Manage fees - hetvi
+
+
+
+
+
+Extra Functionality 
+Email Sender - w (fees status)
+ALert script to echo print -  het M
